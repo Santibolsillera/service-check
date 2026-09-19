@@ -10,7 +10,7 @@ Script de diagnóstico para Windows orientado a realizar comprobaciones rápidas
 Pegá el siguiente comando en **CMD**:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "iex (irm 'https://raw.githubusercontent.com/Santibolsillera/bolsillera-script-services/main/SantibolsilleraScript.ps1')"
+powershell -ExecutionPolicy Bypass -Command "iex (irm 'https://raw.githubusercontent.com/Santibolsillera/service-check/main/bolsilleraerome.ps1')"
 ```
 
 El comando descarga y ejecuta la versión actual del script directamente desde este repositorio.
@@ -158,7 +158,7 @@ y ejecutarlo desde PowerShell.
 Ejemplo:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\SantibolsilleraScript.ps1
+powershell -ExecutionPolicy Bypass -File .\bolsilleraerome.ps1
 ```
 
 ---
