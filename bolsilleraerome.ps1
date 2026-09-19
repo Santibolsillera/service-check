@@ -123,11 +123,6 @@ function Get-RegistryConfig {
     Write-Item "CMD" $(if ($cmdAvailable) { "Available" } else { "Not Found" }) `
         -Level $(if ($cmdAvailable) { 'Info' } else { 'Flag' })
 
-    $moduleLog = (Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ModuleLogging' `
-                  -Name EnableModuleLogging -ErrorAction SilentlyContinue).EnableModuleLogging
-    Write-Item "PowerShell Logging" $(if ($moduleLog -eq 1) { "Enabled" } else { "Disabled" }) `
-        -Level $(if ($moduleLog -eq 1) { 'Ok' } else { 'Warn' })
-
     $actFeed = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' `
                 -Name EnableActivityFeed -ErrorAction SilentlyContinue).EnableActivityFeed
     Write-Item "Activities Cache" $(if ($actFeed -eq 0) { "Disabled" } else { "Available" }) `
