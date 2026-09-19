@@ -1,17 +1,10 @@
-<#
-.DESCRIPTION
-    Diagnostico de solo lectura. No modifica, no borra, no escribe nada en el
-    sistema. Todo hallazgo marcado como FLAG es contexto, no veredicto.
-#>
 
 [CmdletBinding()]
 param()
 
 $ErrorActionPreference = 'SilentlyContinue'
 
-# ---------------------------------------------------------------------------
-# Helpers de salida
-# ---------------------------------------------------------------------------
+
 
 function Write-Section {
     param([string]$Title)
@@ -36,9 +29,7 @@ function Write-Item {
     Write-Host $Value -ForegroundColor $color
 }
 
-# ---------------------------------------------------------------------------
-# SYSTEM BOOT TIME
-# ---------------------------------------------------------------------------
+
 
 function Get-BootTime {
     Write-Section "SYSTEM BOOT TIME"
@@ -51,9 +42,7 @@ function Get-BootTime {
         -Level $(if ($up.TotalMinutes -lt 30) { 'Flag' } else { 'Info' })
 }
 
-# ---------------------------------------------------------------------------
-# CONNECTED DRIVES
-# ---------------------------------------------------------------------------
+
 
 function Get-ConnectedDrives {
     Write-Section "CONNECTED DRIVES"
@@ -64,9 +53,6 @@ function Get-ConnectedDrives {
     }
 }
 
-# ---------------------------------------------------------------------------
-# SERVICE STATUS 
-# ---------------------------------------------------------------------------
 
 function Get-ServiceStatus {
     Write-Section "SERVICE STATUS"
@@ -128,9 +114,7 @@ function Get-ServiceStatus {
     }
 }
 
-# ---------------------------------------------------------------------------
-# REGISTRY / CONFIGURATION
-# ---------------------------------------------------------------------------
+
 
 function Get-RegistryConfig {
     Write-Section "REGISTRY / CONFIGURATION"
@@ -167,9 +151,6 @@ function Get-RegistryConfig {
         -Level $(if ($hasEntries) { 'Info' } else { 'Flag' })
 }
 
-# ---------------------------------------------------------------------------
-# CONSOLE HOST HISTORY
-# ---------------------------------------------------------------------------
 
 function Get-ConsoleHistory {
     Write-Section "CONSOLE HOST HISTORY"
@@ -185,9 +166,6 @@ function Get-ConsoleHistory {
     }
 }
 
-# ---------------------------------------------------------------------------
-# EVENT LOGS
-# ---------------------------------------------------------------------------
 
 function Get-EventLogsInfo {
     Write-Section "EVENT LOGS"
@@ -221,9 +199,6 @@ function Get-EventLogsInfo {
     }
 }
 
-# ---------------------------------------------------------------------------
-# RECYCLE BIN
-# ---------------------------------------------------------------------------
 
 function Get-RecycleBinInfo {
     Write-Section "RECYCLE BIN"
@@ -248,10 +223,6 @@ function Get-RecycleBinInfo {
         Write-Item "Latest Item" $latest.Name
     }
 }
-
-# ---------------------------------------------------------------------------
-# SYSTEM INFORMATION (deteccion de VM)
-# ---------------------------------------------------------------------------
 
 function Get-SystemInformation {
     Write-Section "SYSTEM INFORMATION"
@@ -362,9 +333,6 @@ function Get-BloqueoWebs {
     }
 }
 
-# ---------------------------------------------------------------------------
-# BANNER NUEVO
-# ---------------------------------------------------------------------------
 
 function Show-Banner {
     Clear-Host
@@ -372,12 +340,6 @@ function Show-Banner {
 
     $anchoConsola = $Host.UI.RawUI.WindowSize.Width
 
-    # =========================================================================
-    # SANTIBOLSILLERA - ANSI Shadow / Patorjk
-    # =========================================================================
-    # Se mantienen las 6 filas con el MISMO margen izquierdo. Esto evita que
-    # cada fila se centre por separado y hace que el título quede realmente
-    # alineado.
     $font = @{
         'A' = @(
             '  █████╗ '
@@ -495,9 +457,7 @@ function Show-Banner {
 
     Write-Host ""
 
-    # -------------------------------------------------------------------------
-    # CORAZÓN ROSA - simétrico y centrado
-    # -------------------------------------------------------------------------
+
     $corazon = @(
         '          ▄██▄     ▄██▄'
         '        ███████▄ ▄███████'
@@ -532,7 +492,7 @@ function Show-Banner {
     Write-Host '  By ' -ForegroundColor DarkCyan -NoNewline
     Write-Host $byName -ForegroundColor Cyan
 
-    $version = 'Version 1.1'
+    $version = 'Version 912.18'
     $margenVersion = [Math]::Max(0, [int](($anchoConsola - $version.Length) / 2))
     Write-Host ((' ' * $margenVersion) + $version) -ForegroundColor DarkGray
     Write-Host ""
