@@ -370,40 +370,172 @@ function Show-Banner {
     Clear-Host
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-    Write-Host @"
-  ____             _   _ _           _     _ _ _                 
- / ___|  __ _ _ __| |_(_) |__   ___ | |___(_) | | ___ _ __ __ _  
- \___ \ / _` | '__| __| | '_ \ / _ \| / __| | | |/ _ \ '__/ _` | 
-  ___) | (_| | |  | |_| | |_) | (_) | \__ \ | | |  __/ | | (_| | 
- |____/ \__,_|_|   \__|_|_.__/ \___/|_|___/_|_|_|\___|_|  \__,_| 
-                                                                 
-              S E R V I C E   C H E C K                          
-"@ -ForegroundColor Cyan
+    $anchoConsola = $Host.UI.RawUI.WindowSize.Width
 
-    $anchoConsola =$Host.UI.RawUI.WindowSize.Width
-    $corazon = @(
-        "   ******   ******   ",
-        " ********** ********** ",
-        "************************",
-        " ********************** ",
-        "  ********************  ",
-        "    ****************    ",
-        "      ************      ",
-        "        ********        ",
-        "          ****          ",
-        "           **           "
-    )
-    Write-Host ""
-    foreach ($linea in $corazon) {$espacios = [Math]::Max(0, [int](($anchoConsola -$linea.Length) / 2))
-        Write-Host (" " * $espacios +$linea) -ForegroundColor Red
+    # =========================================================================
+    # SANTIBOLSILLERA - ANSI Shadow / Patorjk
+    # =========================================================================
+    # Se mantienen las 6 filas con el MISMO margen izquierdo. Esto evita que
+    # cada fila se centre por separado y hace que el título quede realmente
+    # alineado.
+    $font = @{
+        'A' = @(
+            '  █████╗ '
+            ' ██╔══██╗'
+            ' ███████║'
+            ' ██╔══██║'
+            ' ██║  ██║'
+            ' ╚═╝  ╚═╝'
+        )
+        'B' = @(
+            ' ██████╗ '
+            ' ██╔══██╗'
+            ' ██████╔╝'
+            ' ██╔══██╗'
+            ' ██████╔╝'
+            ' ╚═════╝ '
+        )
+        'E' = @(
+            ' ███████╗'
+            ' ██╔════╝'
+            ' █████╗  '
+            ' ██╔══╝  '
+            ' ███████╗'
+            ' ╚══════╝'
+        )
+        'I' = @(
+            ' ██╗'
+            ' ██║'
+            ' ██║'
+            ' ██║'
+            ' ██║'
+            ' ╚═╝'
+        )
+        'L' = @(
+            ' ██╗     '
+            ' ██║     '
+            ' ██║     '
+            ' ██║     '
+            ' ███████╗'
+            ' ╚══════╝'
+        )
+        'N' = @(
+            ' ███╗   ██╗'
+            ' ████╗  ██║'
+            ' ██╔██╗ ██║'
+            ' ██║╚██╗██║'
+            ' ██║ ╚████║'
+            ' ╚═╝  ╚═══╝'
+        )
+        'O' = @(
+            '  ██████╗ '
+            ' ██╔═══██╗'
+            ' ██║   ██║'
+            ' ██║   ██║'
+            ' ╚██████╔╝'
+            '  ╚═════╝ '
+        )
+        'R' = @(
+            ' ██████╗ '
+            ' ██╔══██╗'
+            ' ██████╔╝'
+            ' ██╔══██╗'
+            ' ██║  ██║'
+            ' ╚═╝  ╚═╝'
+        )
+        'S' = @(
+            ' ███████╗'
+            ' ██╔════╝'
+            ' ███████╗'
+            ' ╚════██║'
+            ' ███████║'
+            ' ╚══════╝'
+        )
+        'T' = @(
+            ' ████████╗'
+            ' ╚══██╔══╝'
+            '    ██║   '
+            '    ██║   '
+            '    ██║   '
+            '    ╚═╝   '
+        )
+    }
+
+    $titulo = 'SANTIBOLSILLERA'
+
+    # No se recortan los espacios internos de las letras: son parte de la
+    # geometría del ANSI Shadow. Las 6 filas comparten el mismo comienzo.
+    $tituloLineas = for ($fila = 0; $fila -lt 6; $fila++) {
+        (($titulo.ToCharArray() | ForEach-Object {
+            $font[[string]$_][$fila]
+        }) -join '').TrimEnd()
+    }
+
+    $anchoTitulo = ($tituloLineas | ForEach-Object { $_.Length } | Measure-Object -Maximum).Maximum
+    $margenTitulo = [Math]::Max(0, [int](($anchoConsola - $anchoTitulo) / 2))
+
+    foreach ($linea in $tituloLineas) {
+        Write-Host ((' ' * $margenTitulo) + $linea) -ForegroundColor Cyan
     }
 
     Write-Host ""
-    Write-Host "By " -ForegroundColor Cyan -NoNewline
-    Write-Host "bolsilleraerome" -ForegroundColor Blue
+
+    # -------------------------------------------------------------------------
+    # SERVICE CHECK - centrado respecto al mismo ancho de consola
+    # -------------------------------------------------------------------------
+    $subtitulo = 'S E R V I C E   C H E C K'
+    $decoracion = '───────'
+    $subLinea = "$decoracion  $subtitulo  $decoracion"
+    $margenSub = [Math]::Max(0, [int](($anchoConsola - $subLinea.Length) / 2))
+
+    Write-Host ((' ' * $margenSub)) -NoNewline
+    Write-Host $decoracion -ForegroundColor DarkMagenta -NoNewline
+    Write-Host "  $subtitulo  " -ForegroundColor Cyan -NoNewline
+    Write-Host $decoracion -ForegroundColor DarkMagenta
+
     Write-Host ""
-    Write-Host "Version 1.1" -ForegroundColor Green
-    Write-Host "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Green
+
+    # -------------------------------------------------------------------------
+    # CORAZÓN ROSA - simétrico y centrado
+    # -------------------------------------------------------------------------
+    $corazon = @(
+        '          ▄██▄     ▄██▄'
+        '        ███████▄ ▄███████'
+        '       ███████████████████'
+        '       ███████████████████'
+        '        █████████████████'
+        '          █████████████'
+        '            █████████'
+        '              █████'
+        '                █'
+    )
+
+    $anchoCorazon = ($corazon | ForEach-Object { $_.Length } | Measure-Object -Maximum).Maximum
+    $margenCorazon = [Math]::Max(0, [int](($anchoConsola - $anchoCorazon) / 2))
+
+    foreach ($linea in $corazon) {
+        Write-Host ((' ' * $margenCorazon) + $linea) -ForegroundColor Magenta
+    }
+
+    Write-Host ""
+
+    # -------------------------------------------------------------------------
+    # FIRMA
+    # -------------------------------------------------------------------------
+    $byPrefix = '♥  By '
+    $byName   = 'bolsilleraerome'
+    $byline   = $byPrefix + $byName
+    $margenBy = [Math]::Max(0, [int](($anchoConsola - $byline.Length) / 2))
+
+    Write-Host ((' ' * $margenBy)) -NoNewline
+    Write-Host '♥' -ForegroundColor Magenta -NoNewline
+    Write-Host '  By ' -ForegroundColor DarkCyan -NoNewline
+    Write-Host $byName -ForegroundColor Cyan
+
+    $version = 'Version 1.1'
+    $margenVersion = [Math]::Max(0, [int](($anchoConsola - $version.Length) / 2))
+    Write-Host ((' ' * $margenVersion) + $version) -ForegroundColor DarkGray
+    Write-Host ""
 }
 
 # ---------------------------------------------------------------------------
