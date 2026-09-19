@@ -123,10 +123,7 @@ function Get-RegistryConfig {
     Write-Item "CMD" $(if ($cmdAvailable) { "Available" } else { "Not Found" }) `
         -Level $(if ($cmdAvailable) { 'Info' } else { 'Flag' })
 
-    $actFeed = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' `
-                -Name EnableActivityFeed -ErrorAction SilentlyContinue).EnableActivityFeed
-    Write-Item "Activities Cache" $(if ($actFeed -eq 0) { "Disabled" } else { "Available" }) `
-        -Level $(if ($actFeed -eq 0) { 'Flag' } else { 'Info' })
+
 
     $userAssistRoot = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist'
     $hasEntries =$false
