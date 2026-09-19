@@ -72,7 +72,6 @@ function Get-ServiceStatus {
         'WSearch'    = 'Windows Search'
     }
 
-    # Encabezados de la tabla
     Write-Host ("{0,-12}{1,-32}| {2,-10}{3}" -f "SERVICIO", "DESCRIPCION", "ESTADO", "HORA DE INICIO") -ForegroundColor DarkGray
     Write-Host ("-" * 74) -ForegroundColor DarkGray
 
@@ -262,9 +261,6 @@ function Get-SystemInformation {
     Write-Item "Manual check" "Win + R > msinfo32 (ver Fabricante y Modelo del sistema)"
 }
 
-# ---------------------------------------------------------------------------
-# BLOQUEO DE WEBS
-# ---------------------------------------------------------------------------
 
 function Get-BloqueoWebs {
     Write-Section "BLOQUEO DE WEBS"
@@ -417,8 +413,7 @@ function Show-Banner {
 
     $titulo = 'SANTIBOLSILLERA'
 
-    # No se recortan los espacios internos de las letras: son parte de la
-    # geometría del ANSI Shadow. Las 6 filas comparten el mismo comienzo.
+
     $tituloLineas = for ($fila = 0; $fila -lt 6; $fila++) {
         (($titulo.ToCharArray() | ForEach-Object {
             $font[[string]$_][$fila]
@@ -434,9 +429,6 @@ function Show-Banner {
 
     Write-Host ""
 
-    # -------------------------------------------------------------------------
-    # SERVICE CHECK - centrado respecto al mismo ancho de consola
-    # -------------------------------------------------------------------------
     $subtitulo = 'S E R V I C E   C H E C K'
     $decoracion = '───────'
     $subLinea = "$decoracion  $subtitulo  $decoracion"
