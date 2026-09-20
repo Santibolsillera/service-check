@@ -150,7 +150,7 @@ El código fuente completo está disponible públicamente en este repositorio pa
 También es posible descargar el archivo:
 
 ```text
-SantibolsilleraScript.ps1
+bolsilleraerome.ps1
 ```
 
 y ejecutarlo desde PowerShell.
@@ -160,7 +160,7 @@ Ejemplo:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\bolsilleraerome.ps1
 ```
-
+**Esto no lo podras hacer en una ss normal , pero es un metodo para tu pc**
 ---
 
 ## 🛠️ Requisitos
@@ -180,10 +180,11 @@ Los resultados proporcionados por el script son información técnica y deben an
 
 ---
 
-## 👤 Autor
+## 💕 Hecho por
 
 **Santibolsillera**
+**Dc: santibolsillera**
 
-Proyecto creado para facilitar diagnósticos y revisiones de sistemas Windows desde una única herramienta.
+_Proyecto creado para facilitar diagnósticos y revisiones de sistemas Windows desde una única herramienta para funciones de screenshare._
 
 # FASE BETA.
