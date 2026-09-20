@@ -183,6 +183,7 @@ Los resultados proporcionados por el script son información técnica y deben an
 ## 💕 Hecho por
 
 **Santibolsillera**
+
 **Dc: santibolsillera**
 
 _Proyecto creado para facilitar diagnósticos y revisiones de sistemas Windows desde una única herramienta para funciones de screenshare._
