@@ -1,4 +1,3 @@
-
 [CmdletBinding()]
 param()
 
@@ -36,6 +35,9 @@ function Get-BootTime {
     $os   = Get-CimInstance Win32_OperatingSystem
     $boot =$os.LastBootUpTime
     $up   = (Get-Date) -$boot
+
+ 
+    $script:LogonTime = $boot
 
     Write-Item "Last Boot" "$boot"
     Write-Item "Uptime" "$($up.Days) days, $($up.ToString('hh\:mm\:ss'))" `
@@ -122,6 +124,28 @@ function Get-RegistryConfig {
     Write-Item "CMD" $(if ($cmdAvailable) { "Available" } else { "Not Found" }) `
         -Level $(if ($cmdAvailable) { 'Info' } else { 'Flag' })
 
+    $psOpt = Get-PSReadLineOption -ErrorAction SilentlyContinue
+    if ($psOpt) {
+        if ($psOpt.HistorySaveStyle -eq 'SaveNothing') {
+            Write-Item "PowerShell Logging" "Disabled (SaveNothing)" -Level Flag
+        } else {
+            Write-Item "PowerShell Logging" "Enabled ($($psOpt.HistorySaveStyle))" -Level Ok
+        }
+    } else {
+        Write-Item "PowerShell Logging" "No disponible" -Level Warn
+    }
+
+    $actFeed = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' `
+                -Name EnableActivityFeed -ErrorAction SilentlyContinue).EnableActivityFeed
+    Write-Item "Activities Cache" $(if ($actFeed -eq 0) { "Disabled" } else { "Available" }) `
+        -Level $(if ($actFeed -eq 0) { 'Flag' } else { 'Info' })
+
+
+    $prefetch = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' `
+                 -Name EnablePrefetcher -ErrorAction SilentlyContinue).EnablePrefetcher
+    Write-Item "Prefetch Enable" $(if ($prefetch -in 1,2,3) { "Available ($prefetch)" } else { "Disabled" }) `
+        -Level $(if ($prefetch -in 1,2,3) { 'Info' } else { 'Warn' })
+
 
 
     $userAssistRoot = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist'
@@ -179,9 +203,16 @@ function Get-EventLogsInfo {
 
     Write-Item "System Time" "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 
+    $filterSec = @{ LogName = 'Security'; Id = 1102 }
+    $filterSys = @{ LogName = 'System'; Id = 104 }
+    if ($script:LogonTime) {
+        $filterSec['StartTime'] = $script:LogonTime
+        $filterSys['StartTime'] = $script:LogonTime
+    }
+
     $cleared = @()
-    $cleared += Get-WinEvent -FilterHashtable @{ LogName = 'Security'; Id = 1102 } -MaxEvents 5 -ErrorAction SilentlyContinue
-    $cleared += Get-WinEvent -FilterHashtable @{ LogName = 'System'; Id = 104 } -MaxEvents 5 -ErrorAction SilentlyContinue
+    $cleared += Get-WinEvent -FilterHashtable $filterSec -MaxEvents 20 -ErrorAction SilentlyContinue
+    $cleared += Get-WinEvent -FilterHashtable $filterSys -MaxEvents 20 -ErrorAction SilentlyContinue
 
     if ($cleared.Count -gt 0) {
         Write-Item "Logs Cleared" "YES ($($cleared.Count) evento(s))" -Level Flag
@@ -202,8 +233,9 @@ function Get-RecycleBinInfo {
         return
     }
 
-    $dir  = Get-Item -LiteralPath $bin -Force
-    $meta = Get-ChildItem -LiteralPath $bin -Force -Filter '$I*' -ErrorAction SilentlyContinue
+    $dir     = Get-Item -LiteralPath $bin -Force
+    $allMeta = Get-ChildItem -LiteralPath $bin -Force -Filter '$I*' -ErrorAction SilentlyContinue
+    $meta    = if ($script:LogonTime) { $allMeta | Where-Object { $_.LastWriteTime -ge $script:LogonTime } } else { $allMeta }
 
     Write-Item "Last Modified" "$($dir.LastWriteTime)" `
         -Level $(if ((New-TimeSpan -Start $dir.LastWriteTime).TotalHours -lt 3) { 'Flag' } else { 'Info' })
