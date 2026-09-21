@@ -331,20 +331,34 @@ function Get-BloqueoWebs {
     if ($entries.Count -eq 0) {
         Write-Item "Webs bloqueadas" "CHECK SUCCEEDED - CLEANED" -Level Ok
     } else {
-        foreach ($e in $entries) {
-            if ($e.Domain -match '(?i)(^|\.)github\.com$') {
-                Write-Host "⚠ " -ForegroundColor Red -NoNewline
-                  Write-Host "  Ubicacion: $($e.Location)" -ForegroundColor Yellow -NoNewline
-                Write-Host "   <<< INSTA BAN >>>" -ForegroundColor Red
-                Write-Host "  " -NoNewline
+        $groupedEntries = $entries | Group-Object Location
+
+        foreach ($group in $groupedEntries) {
+            $hasGithub = $false
+            foreach ($entry in $group.Group) {
+                if ($entry.Domain -match '(?i)(^|\.)github\.com$') {
+                    $hasGithub = $true
+                    break
+                }
+            }
+
+            Write-Host "   " -NoNewline
+            Write-Host "[!]" -ForegroundColor $(if ($hasGithub) { 'Red' } else { 'Yellow' }) -NoNewline
+            Write-Host " " -NoNewline
+            Write-Host $group.Name -ForegroundColor Yellow
+
+            foreach ($e in $group.Group) {
+                $isGithub = $e.Domain -match '(?i)(^|\.)github\.com$'
+
+                Write-Host "       " -NoNewline
                 Write-Host "●" -ForegroundColor Red -NoNewline
-                Write-Host " $($e.Domain)" -ForegroundColor Yellow
-            } else {
-                Write-Host "⚠ " -ForegroundColor Yellow -NoNewline
-                Write-Host "Ubicacion: $($e.Location)" -ForegroundColor Yellow
-                Write-Host "  " -NoNewline
-                Write-Host "●" -ForegroundColor Red -NoNewline
-                Write-Host " $($e.Domain)" -ForegroundColor Yellow
+                Write-Host " $($e.Domain)" -ForegroundColor Yellow -NoNewline
+
+                if ($isGithub) {
+                    Write-Host "  <<< INSTA BAN >>>" -ForegroundColor Red
+                } else {
+                    Write-Host ""
+                }
             }
         }
     }
