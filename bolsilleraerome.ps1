@@ -334,7 +334,7 @@ function Get-BloqueoWebs {
         foreach ($e in $entries) {
             if ($e.Domain -match '(?i)(^|\.)github\.com$') {
                 Write-Host "⚠ " -ForegroundColor Red -NoNewline
-                Write-Host "Ubicacion: $($e.Location)" -ForegroundColor Yellow -NoNewline
+                  Write-Host "  Ubicacion: $($e.Location)" -ForegroundColor Yellow -NoNewline
                 Write-Host "   <<< INSTA BAN >>>" -ForegroundColor Red
                 Write-Host "  " -NoNewline
                 Write-Host "●" -ForegroundColor Red -NoNewline
