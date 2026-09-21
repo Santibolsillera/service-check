@@ -51,7 +51,7 @@ function Get-ConnectedDrives {
     Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
         $sizeGb = [math]::Round($_.Size / 1GB, 1)
         $freeGb = [math]::Round($_.FreeSpace / 1GB, 1)
-        Write-Item "$($_.DeviceID)" "$($_.FileSystem) | $sizeGb GB | $freeGb GB free"
+        Write-Item "$($_.DeviceID)" "$($_.FileSystem) | $sizeGb GB \vert{}$freeGb GB free"
     }
 }
 
@@ -77,11 +77,10 @@ function Get-ServiceStatus {
     Write-Host ("{0,-12}{1,-32}| {2,-10}{3}" -f "SERVICIO", "DESCRIPCION", "ESTADO", "HORA DE INICIO") -ForegroundColor DarkGray
     Write-Host ("-" * 74) -ForegroundColor DarkGray
 
-    foreach ($key in $services.Keys) {
-        $label = $services[$key]
-        $svc   = Get-Service -Name $key -ErrorAction SilentlyContinue
+    foreach ($key in $services.Keys) {$label = $services[$key]
+        $svc   = Get-Service -Name$key -ErrorAction SilentlyContinue
 
-        Write-Host ("{0,-12}{1,-32}" -f $key, $label) -ForegroundColor White -NoNewline
+        Write-Host ("{0,-12}{1,-32}" -f $key,$label) -ForegroundColor White -NoNewline
         Write-Host "| " -ForegroundColor Cyan -NoNewline
 
         if (-not $svc) {
@@ -91,7 +90,7 @@ function Get-ServiceStatus {
 
         $status      = if ($svc.Status -eq 'Running') { 'Enabled' } else { 'Disabled' }
         $statusColor = if ($status -eq 'Enabled') { 'Green' } else { 'Red' }
-        Write-Host ("{0,-10}" -f $status) -ForegroundColor $statusColor -NoNewline
+        Write-Host ("{0,-10}" -f $status) -ForegroundColor$statusColor -NoNewline
 
         if ($key -eq 'bam') {
             Write-Host "SYSTEM" -ForegroundColor Magenta
@@ -101,8 +100,8 @@ function Get-ServiceStatus {
                 try {
                     $cimSvc = Get-CimInstance Win32_Service -Filter "Name='$key'" -ErrorAction Stop
                     if ($cimSvc.ProcessId -gt 0) {
-                        $proc = Get-Process -Id $cimSvc.ProcessId -ErrorAction Stop
-                        $timeStr = $proc.StartTime.ToString('HH:mm:ss')
+                        $proc = Get-Process -Id$cimSvc.ProcessId -ErrorAction Stop
+                        $timeStr =$proc.StartTime.ToString('HH:mm:ss')
                     }
                 } catch { 
                     $timeStr = "N/A"
@@ -192,27 +191,25 @@ function Get-EventLogsInfo {
         Write-Item "Last PC Shutdown" "no registrado" -Level Warn
     }
 
-    $eventLogSvc = Get-Service -Name EventLog -ErrorAction SilentlyContinue
-    $started = if ($eventLogSvc -and $eventLogSvc.Status -eq 'Running') { 
+    $eventLogSvc = Get-Service -Name EventLog -ErrorAction SilentlyContinue$started = if ($eventLogSvc -and$eventLogSvc.Status -eq 'Running') { 
         try {
             $cimSvc = Get-CimInstance Win32_Service -Filter "Name='EventLog'" -ErrorAction Stop
-            if ($cimSvc.ProcessId -gt 0) { (Get-Process -Id $cimSvc.ProcessId -ErrorAction Stop).StartTime.ToString('yyyy-MM-dd HH:mm:ss') }
+            if ($cimSvc.ProcessId -gt 0) { (Get-Process -Id$cimSvc.ProcessId -ErrorAction Stop).StartTime.ToString('yyyy-MM-dd HH:mm:ss') }
         } catch { }
     }
-    Write-Item "Event Log Started" $(if ($started) { $started } else { "desconocido" })
+    Write-Item "Event Log Started" $(if ($started) {$started } else { "desconocido" })
 
     Write-Item "System Time" "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 
-    $filterSec = @{ LogName = 'Security'; Id = 1102 }
-    $filterSys = @{ LogName = 'System'; Id = 104 }
+    $filterSec = @{ LogName = 'Security'; Id = 1102 }$filterSys = @{ LogName = 'System'; Id = 104 }
     if ($script:LogonTime) {
-        $filterSec['StartTime'] = $script:LogonTime
-        $filterSys['StartTime'] = $script:LogonTime
+        $filterSec['StartTime'] =$script:LogonTime
+        $filterSys['StartTime'] =$script:LogonTime
     }
 
     $cleared = @()
-    $cleared += Get-WinEvent -FilterHashtable $filterSec -MaxEvents 20 -ErrorAction SilentlyContinue
-    $cleared += Get-WinEvent -FilterHashtable $filterSys -MaxEvents 20 -ErrorAction SilentlyContinue
+    $cleared += Get-WinEvent -FilterHashtable$filterSec -MaxEvents 20 -ErrorAction SilentlyContinue
+    $cleared += Get-WinEvent -FilterHashtable$filterSys -MaxEvents 20 -ErrorAction SilentlyContinue
 
     if ($cleared.Count -gt 0) {
         Write-Item "Logs Cleared" "YES ($($cleared.Count) evento(s))" -Level Flag
@@ -238,11 +235,11 @@ function Get-RecycleBinInfo {
     $meta    = if ($script:LogonTime) { $allMeta | Where-Object { $_.LastWriteTime -ge $script:LogonTime } } else { $allMeta }
 
     Write-Item "Last Modified" "$($dir.LastWriteTime)" `
-        -Level $(if ((New-TimeSpan -Start $dir.LastWriteTime).TotalHours -lt 3) { 'Flag' } else { 'Info' })
+        -Level $(if ((New-TimeSpan -Start$dir.LastWriteTime).TotalHours -lt 3) { 'Flag' } else { 'Info' })
     Write-Item "Total Items" "$($meta.Count)"
 
     if ($meta.Count -gt 0) {
-        $latest = $meta | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        $latest =$meta | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         Write-Item "Latest Item" $latest.Name
     }
 }
@@ -251,32 +248,26 @@ function Get-SystemInformation {
     Write-Section "SYSTEM INFORMATION"
 
     $cs    = Get-CimInstance Win32_ComputerSystem
-    $bios  = Get-CimInstance Win32_BIOS
-    $board = Get-CimInstance Win32_BaseBoard
+    $bios  = Get-CimInstance Win32_BIOS$board = Get-CimInstance Win32_BaseBoard
 
     $combined = "$($cs.Manufacturer) $($cs.Model) $($bios.Manufacturer) $($bios.SMBIOSBIOSVersion) $($board.Manufacturer) $($board.Product)"
 
     $vmSignatures = @('VMware','VirtualBox','Virtual Machine','QEMU','Xen','innotek','Parallels','Bochs')
-    $hwHits = $vmSignatures | Where-Object { $combined -match $_ }
+    $hwHits =$vmSignatures | Where-Object { $combined -match$_ }
 
-    $ouiMap = @{
-        '00:05:69' = 'VMware'; '00:0C:29' = 'VMware'; '00:1C:14' = 'VMware'; '00:50:56' = 'VMware'
-        '08:00:27' = 'VirtualBox'; '00:03:FF' = 'Hyper-V'; '00:15:5D' = 'Hyper-V'; '00:16:3E' = 'Xen'
-    }
-    $macHits = Get-CimInstance Win32_NetworkAdapter -Filter "MACAddress IS NOT NULL" | ForEach-Object {
-        $oui = $_.MACAddress.Substring(0,8)
-        if ($ouiMap.ContainsKey($oui)) { "MAC $($_.MACAddress) ($($_.Name)) -> $($ouiMap[$oui])" }
+    $ouiMap = @{         '00:05:69' = 'VMware'; '00:0C:29' = 'VMware'; '00:1C:14' = 'VMware'; '00:50:56' = 'VMware'         '08:00:27' = 'VirtualBox'; '00:03:FF' = 'Hyper-V'; '00:15:5D' = 'Hyper-V'; '00:16:3E' = 'Xen'     }$macHits = Get-CimInstance Win32_NetworkAdapter -Filter "MACAddress IS NOT NULL" | ForEach-Object {
+        $oui =$_.MACAddress.Substring(0,8)
+        if ($ouiMap.ContainsKey($oui)) { "MAC $($_.MACAddress) ($($_.Name)) ->$($ouiMap[$oui])" }
     }
 
-    $vmProcs   = @('vmtoolsd','vboxservice','vboxtray','vm3dservice','vmwareuser','VGAuthService','qemu-ga')
-    $procHits  = Get-Process -ErrorAction SilentlyContinue |
-                 Where-Object { $vmProcs -contains $_.Name.ToLower() } |
+    $vmProcs   = @('vmtoolsd','vboxservice','vboxtray','vm3dservice','vmwareuser','VGAuthService','qemu-ga')$procHits  = Get-Process -ErrorAction SilentlyContinue |
+                 Where-Object { $vmProcs -contains$_.Name.ToLower() } |
                  ForEach-Object { "Proceso activo: $($_.Name)" }
 
     $allHits = @()
-    if ($hwHits)  { $allHits += $hwHits | ForEach-Object { "Firma de hardware: $_" } }
-    if ($macHits) { $allHits += $macHits }
-    if ($procHits){ $allHits += $procHits }
+    if ($hwHits)  { $allHits +=$hwHits | ForEach-Object { "Firma de hardware: $_" } }
+    if ($macHits) { $allHits +=$macHits }
+    if ($procHits){ $allHits +=$procHits }
 
     if ($allHits.Count -gt 0) {
         Write-Host ""
@@ -301,12 +292,11 @@ function Get-BloqueoWebs {
 
     $hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
     if (Test-Path -LiteralPath $hostsPath) {
-        $lines = Get-Content -LiteralPath $hostsPath -ErrorAction SilentlyContinue |
-                 Where-Object { $_.Trim() -and -not $_.Trim().StartsWith('#') }
-        foreach ($l in $lines) {
-            $parts = $l.Trim() -split '\s+'
-            if ($parts.Count -ge 2) {
-                $entries += [pscustomobject]@{ Location = $hostsPath; Domain = $parts[1] }
+        $lines = Get-Content -LiteralPath$hostsPath -ErrorAction SilentlyContinue |
+                 Where-Object { $_.Trim() -and -not$_.Trim().StartsWith('#') }
+        foreach ($l in$lines) {
+            $parts =$l.Trim() -split '\s+'
+            if ($parts.Count -ge 2) {$entries += [pscustomobject]@{ Location = $hostsPath; Domain =$parts[1] }
             }
         }
     }
@@ -315,15 +305,13 @@ function Get-BloqueoWebs {
         'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains',
         'HKLM:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains'
     )
-    foreach ($root in $zoneRoots) {
+    foreach ($root in$zoneRoots) {
         if (-not (Test-Path $root)) { continue }
-        foreach ($domKey in (Get-ChildItem $root -Recurse -ErrorAction SilentlyContinue)) {
-            $props = Get-ItemProperty -Path $domKey.PSPath -ErrorAction SilentlyContinue
-            foreach ($p in $props.PSObject.Properties) {
+        foreach ($domKey in (Get-ChildItem$root -Recurse -ErrorAction SilentlyContinue)) {
+            $props = Get-ItemProperty -Path$domKey.PSPath -ErrorAction SilentlyContinue
+            foreach ($p in$props.PSObject.Properties) {
                 if ($p.Name -like 'PS*') { continue }
-                if ($p.Value -ne 4) { continue }
-                $domain = ($domKey.Name -split 'Domains\\')[-1]
-                $entries += [pscustomobject]@{ Location = "Registro: Sitios Restringidos ($domKey.Name)"; Domain = $domain }
+                if ($p.Value -ne 4) { continue }$domain = ($domKey.Name -split 'Domains\\')[-1]$entries += [pscustomobject]@{ Location = "Registro: Sitios Restringidos ($domKey.Name)"; Domain = $domain }
             }
         }
     }
@@ -331,12 +319,24 @@ function Get-BloqueoWebs {
     if ($entries.Count -eq 0) {
         Write-Item "Webs bloqueadas" "CHECK SUCCEEDED - CLEANED" -Level Ok
     } else {
-        foreach ($e in $entries) {
-            Write-Host "Ubicacion: $($e.Location)" -ForegroundColor Green
+        foreach ($e in$entries) {
             if ($e.Domain -match 'github\.com') {
-                Write-Host "  $($e.Domain)   <<< INSTA BAN >>>" -ForegroundColor Red
+                Write-Host "Ubicacion: " -ForegroundColor Green -NoNewline
+                Write-Host "$($e.Location) " -ForegroundColor Green -NoNewline
+                Write-Host ""
+                
+                Write-Host "  " -NoNewline
+                Write-Host "• " -ForegroundColor Red -NoNewline
+                Write-Host "$($e.Domain)   <<< INSTA BAN >>> " -ForegroundColor Red -NoNewline
+                Write-Host "[⚠]" -ForegroundColor Red
             } else {
-                Write-Host "  $($e.Domain)" -ForegroundColor Gray
+                Write-Host "Ubicacion: " -ForegroundColor Green -NoNewline
+                Write-Host "$($e.Location) " -ForegroundColor Yellow -NoNewline
+                Write-Host "[⚠]" -ForegroundColor Yellow
+
+                Write-Host "  " -NoNewline
+                Write-Host "• " -ForegroundColor Red -NoNewline
+                Write-Host "$($e.Domain)" -ForegroundColor Yellow
             }
         }
     }
@@ -358,7 +358,7 @@ function Show-Banner {
     Clear-Host
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-    $anchoConsola = $Host.UI.RawUI.WindowSize.Width
+    $anchoConsola =$Host.UI.RawUI.WindowSize.Width
 
     $font = @{
         'A' = @(
@@ -447,24 +447,22 @@ function Show-Banner {
 
 
     $tituloLineas = for ($fila = 0; $fila -lt 6; $fila++) {
-        (($titulo.ToCharArray() | ForEach-Object {
-            $font[[string]$_][$fila]
+        (($titulo.ToCharArray() \vert{} ForEach-Object {$font[[string]$_][$fila]
         }) -join '').TrimEnd()
     }
 
-    $anchoTitulo = ($tituloLineas | ForEach-Object { $_.Length } | Measure-Object -Maximum).Maximum
-    $margenTitulo = [Math]::Max(0, [int](($anchoConsola - $anchoTitulo) / 2))
+    $anchoTitulo = ($tituloLineas \vert{} ForEach-Object {$_.Length } | Measure-Object -Maximum).Maximum
+    $margenTitulo = [Math]::Max(0, [int](($anchoConsola -$anchoTitulo) / 2))
 
-    foreach ($linea in $tituloLineas) {
-        Write-Host ((' ' * $margenTitulo) + $linea) -ForegroundColor Cyan
+    foreach ($linea in$tituloLineas) {
+        Write-Host ((' ' * $margenTitulo) +$linea) -ForegroundColor Cyan
     }
 
     Write-Host ""
 
-    $subtitulo = 'S E R V I C E   C H E C K'
-    $decoracion = '───────'
-    $subLinea = "$decoracion  $subtitulo  $decoracion"
-    $margenSub = [Math]::Max(0, [int](($anchoConsola - $subLinea.Length) / 2))
+    $subtitulo = 'S E R V I C E   C H E C K'$decoracion = '───────'
+    $subLinea = "$decoracion  $subtitulo$decoracion"
+    $margenSub = [Math]::Max(0, [int](($anchoConsola -$subLinea.Length) / 2))
 
     Write-Host ((' ' * $margenSub)) -NoNewline
     Write-Host $decoracion -ForegroundColor DarkMagenta -NoNewline
@@ -486,28 +484,26 @@ function Show-Banner {
         '                █'
     )
 
-    $anchoCorazon = ($corazon | ForEach-Object { $_.Length } | Measure-Object -Maximum).Maximum
-    $margenCorazon = [Math]::Max(0, [int](($anchoConsola - $anchoCorazon) / 2))
+    $anchoCorazon = ($corazon \vert{} ForEach-Object {$_.Length } | Measure-Object -Maximum).Maximum
+    $margenCorazon = [Math]::Max(0, [int](($anchoConsola -$anchoCorazon) / 2))
 
-    foreach ($linea in $corazon) {
-        Write-Host ((' ' * $margenCorazon) + $linea) -ForegroundColor Magenta
+    foreach ($linea in$corazon) {
+        Write-Host ((' ' * $margenCorazon) +$linea) -ForegroundColor Magenta
     }
 
     Write-Host ""
 
     $byPrefix = '♥  By '
     $byName   = 'bolsilleraerome'
-    $byline   = $byPrefix + $byName
-    $margenBy = [Math]::Max(0, [int](($anchoConsola - $byline.Length) / 2))
+    $byline   =$byPrefix + $byName$margenBy = [Math]::Max(0, [int](($anchoConsola -$byline.Length) / 2))
 
     Write-Host ((' ' * $margenBy)) -NoNewline
     Write-Host '♥' -ForegroundColor Magenta -NoNewline
     Write-Host '  By ' -ForegroundColor DarkCyan -NoNewline
     Write-Host $byName -ForegroundColor Cyan
 
-    $version = 'Version 912.18'
-    $margenVersion = [Math]::Max(0, [int](($anchoConsola - $version.Length) / 2))
-    Write-Host ((' ' * $margenVersion) + $version) -ForegroundColor DarkGray
+    $version = 'Version 912.18'$margenVersion = [Math]::Max(0, [int](($anchoConsola -$version.Length) / 2))
+    Write-Host ((' ' * $margenVersion) +$version) -ForegroundColor DarkGray
     Write-Host ""
 }
 
