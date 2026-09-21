@@ -332,11 +332,19 @@ function Get-BloqueoWebs {
         Write-Item "Webs bloqueadas" "CHECK SUCCEEDED - CLEANED" -Level Ok
     } else {
         foreach ($e in $entries) {
-            Write-Host "Ubicacion: $($e.Location)" -ForegroundColor Green
-            if ($e.Domain -match 'github\.com') {
-                Write-Host "  $($e.Domain)   <<< INSTA BAN >>>" -ForegroundColor Red
+            if ($e.Domain -match '(?i)(^|\.)github\.com$') {
+                Write-Host "⚠ " -ForegroundColor Red -NoNewline
+                Write-Host "Ubicacion: $($e.Location)" -ForegroundColor Yellow -NoNewline
+                Write-Host "   <<< INSTA BAN >>>" -ForegroundColor Red
+                Write-Host "  " -NoNewline
+                Write-Host "●" -ForegroundColor Red -NoNewline
+                Write-Host " $($e.Domain)" -ForegroundColor Yellow
             } else {
-                Write-Host "  $($e.Domain)" -ForegroundColor Gray
+                Write-Host "⚠ " -ForegroundColor Yellow -NoNewline
+                Write-Host "Ubicacion: $($e.Location)" -ForegroundColor Yellow
+                Write-Host "  " -NoNewline
+                Write-Host "●" -ForegroundColor Red -NoNewline
+                Write-Host " $($e.Domain)" -ForegroundColor Yellow
             }
         }
     }
